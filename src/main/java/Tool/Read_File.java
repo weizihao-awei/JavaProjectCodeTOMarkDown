@@ -1,4 +1,4 @@
-package org.becomingMd;
+package Tool;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,13 +32,6 @@ public ArrayList<String> read_md() throws Exception {
    }
    br.close();
 
-//   // 创建一个新列表进行深拷贝
-//   ArrayList<String> deepCopyList = new ArrayList<>();
-//   for (String item : list) {
-//      deepCopyList.add(new String(item)); // 这里使用new String()确保是新的对象
-//   }
-
-
    return list;
 }
 public static ArrayList<String> read_md(File path) throws IOException {
@@ -52,5 +45,23 @@ public static ArrayList<String> read_md(File path) throws IOException {
    return list;
 
 }
+    /**
+     * 读取文件内容并返回字符串
+     * @param path 文件路径
+     * @return 文件内容字符串
+     * @throws IOException 当文件读取失败时抛出
+     */
+    public static String read_md_String(File path) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        char[] buffer = new char[8192]; // 8KB缓冲区
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            int bytesRead;
+            while ((bytesRead = br.read(buffer)) != -1) {
+                sb.append(buffer, 0, bytesRead);
+            }
+        }
+        return sb.toString();
+    }
+
 
 }

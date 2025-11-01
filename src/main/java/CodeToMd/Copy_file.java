@@ -1,4 +1,4 @@
-package org.becomingMd;
+package CodeToMd;
 
 import java.io.File;
 import java.io.FileInputStream;

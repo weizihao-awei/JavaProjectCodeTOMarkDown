@@ -19,7 +19,10 @@ public enum CodeTypeEnum {
     LESS("less"),
     VUE("vue"),
     REACT("jsx"),
+    XML("xml"),
     ANGULAR("ts");
+    //增加xml
+
 
     private final String extension;
 

@@ -1,11 +1,14 @@
 package Tool;
 
+import CodeToMd.DirectoryEnum.CodeTypeEnum;
 import CodeToMd.DirectoryEnum.FileExtensionName;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 
 public class FileProcess {
@@ -85,6 +88,33 @@ public static String CreateFileName(File dir, String fileName, FileExtensionName
  */
     public static Boolean iSameFilename(File fileNameWithExtension){
        return fileNameWithExtension.exists();
+    }
+
+    //过滤掉不需要的目录名字 .开头的目录
+    public static List<File> filterDirName(List<File> files) {
+        List<File> filteredFiles = new ArrayList<>();
+        for (File file : files) {
+            if (!file.getName().startsWith(".")) {
+                filteredFiles.add(file);
+            }
+        }
+        return filteredFiles;
+    }
+
+    /**
+     * 描述：过滤出代码文件
+     */
+    public static   List<File> filterCodeFiles(List<File> files) {
+        List<File> codeFiles = new ArrayList<>();
+        for (File file : files) {
+            if (file.isFile()) {
+                String extension = getFileExtension(file);
+                if (CodeTypeEnum.contains(extension)) {
+                    codeFiles.add(file);
+                }
+            }
+        }
+        return codeFiles;
     }
 
 

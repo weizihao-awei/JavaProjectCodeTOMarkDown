@@ -5,23 +5,13 @@ public enum CodeTypeEnum {
     PYTHON("py"),
     CPP("cpp"),
     C("c"),
-    JAVASCRIPT("js"),
-    PHP("php"),
-    RUBY("rb"),
-    GO("go"),
-    KOTLIN("kt"),
-    SWIFT("swift"),
-    RUST("rs"),
-    HTML("html"),
-    CSS("css"),
-    TYPESCRIPT("ts"),
-    SCSS("scss"),
-    LESS("less"),
-    VUE("vue"),
-    REACT("jsx"),
     XML("xml"),
-    ANGULAR("ts");
-    //增加xml
+    TEXT("txt"),
+    SQL("sql"),
+    JSON("json"),
+    //增加对yaml文件的支持
+    YAML("yml");
+
 
 
     private final String extension;

@@ -12,20 +12,16 @@ import static Tool.FileProcess.filterDirName;
  *
  */
 public class TreeNode {
-private File directory;
-    
+    //最顶层的根节点
+    public static TreeNode root;
 
+    private File directory;
     private String dirName;
-    
-
     private TreeNode parent;
-    
-
-
     // 用来存储子目录
-private List<TreeNode> childrenDir = new ArrayList<>();
-//用来存储子文件
-private List<File> childrenFile = new ArrayList<>();
+    private List<TreeNode> childrenDir ;
+    //用来存储子文件
+    private List<File> childrenFile ;
 
 /**
  * 获取子目录列表
@@ -47,6 +43,9 @@ public List<File> getChildrenFile() {
     public TreeNode(File directory) {
         this.directory = directory;
         this.dirName = directory.getName();
+        this.childrenDir = new ArrayList<>();
+        this.childrenFile = new ArrayList<>();
+        this.parent = null;
     }
     //真正的构造方法
     /**
@@ -99,10 +98,11 @@ public List<File> getChildrenFile() {
     /* ========== 核心：双向绑定 ========== */
     public void addChild(TreeNode child) {
         Objects.requireNonNull(child);
-        if (child.parent != null) {               // 先从原父节点移除
+        if (child.parent != null) {
+            // 先从原父节点移除,这个是给
             child.parent.childrenDir.remove(child);
         }
-        childrenDir.add(child);
+        this.childrenDir.add(child);
         child.parent = this;                      // 指回父节点
     }
 

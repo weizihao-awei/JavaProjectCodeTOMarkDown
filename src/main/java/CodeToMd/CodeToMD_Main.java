@@ -6,8 +6,6 @@ import java.util.*;
 
 
 import CodeToMd.DirectoryEnum.FileExtensionName;
-import CodeToMd.DirectoryEnum.FilterDirectory;
-import CodeToMd.DirectoryEnum.StaticField;
 import Tool.ListTreeDir;
 import Tool.TreeNode;
 import Tool.Write_File;
@@ -23,32 +21,16 @@ import static Tool.Stirng_Process.removeDoubleQuotes;
 public class CodeToMD_Main {
     private static final Logger logger = LoggerFactory.getLogger(CodeToMD_Main.class);
 
-
-    //文件存放位置
-    private static File DEFAULT_SOURCE_DIR = new File("C:\\Users\\86158\\OneDrive\\工作仓库\\工作仓库\\Code");
+    //处理完后的md文件存放目录
+    private static File TARGET_DIR =null;
+    // 1:表示标准md双链 2:表示obsidian格式双链
+    private static Integer mode = 1;
 
 
     public static void main(String[] args) throws IOException {
-        Scanner scanner = new Scanner(System.in);
 
-        // 提示用户输入目录路径
-        System.out.println("请输入要处理的源代码目录路径:");
-        String inputPath = scanner.nextLine().trim();
-        //去除双引号
-        inputPath=removeDoubleQuotes(inputPath);
-
-        //增加模式选择，是否开启前端模式
-        System.out.println("是否开启前端模式？(y/n)");
-        String mode = scanner.nextLine();
-        boolean frontendMode = mode.equalsIgnoreCase("y");
-        if (frontendMode) {
-            System.out.println("前端模式已开启，将生成前端文件");
-            FilterDirectory.parentDir=new File(inputPath);
-            StaticField.isOpenFrontend = true;
-        }
-
-
-
+        // 获取用户输入的目录路径
+        String inputPath = getSourceCodePath();
 
 
         File sourceDir = new File(inputPath);
@@ -58,7 +40,7 @@ public class CodeToMD_Main {
         }
 
         // 创建md文件存放目录（使用新变量而非修改final常量）
-        DEFAULT_SOURCE_DIR = Write_File.createDirectory(DEFAULT_SOURCE_DIR, sourceDir.getName());
+        TARGET_DIR = Write_File.createDirectory(TARGET_DIR, sourceDir.getName());
 
         System.out.println("开始处理目录: " + sourceDir.getAbsolutePath());
 
@@ -66,16 +48,69 @@ public class CodeToMD_Main {
         codeToMD_Main.processDirectory(sourceDir);
 
         System.out.println("处理完成!");
+
+    }
+
+
+    /**
+     * 获取用户输入的目录路径配置
+     * @return 源代码目录路径
+     */
+    /**
+     * 获取用户输入的目录路径配置
+     * @return 源代码目录路径
+     */
+    private static String getSourceCodePath() {
+        //todo: 最好设置成循环，直到用户输入正确，或者有退出键
+        Scanner scanner = new Scanner(System.in);
+
+        // 提示用户输入目录路径
+        System.out.println("请输入要处理的源代码目录绝对地址:");
+
+        String sourceCodePath = scanner.nextLine().trim();
+        // 去除双引号
+        sourceCodePath = removeDoubleQuotes(sourceCodePath);
+
+        // 获取用户输入的生成md文件存放位置
+        System.out.println("请输入要生成的md文件存放的文件夹的绝对地址:");
+        String targetPath = scanner.nextLine();
+        targetPath = removeDoubleQuotes(targetPath);
+        // 赋值给静态变量
+        //todo: 这里应该判断一下给出地址是不是有问题的，比如给出的目录不存在
+
+        TARGET_DIR = new File(targetPath);
+
+        System.out.println("请选择生成md文件的模式(输入数字)：");
+        System.out.println("1:表示标准md双链 2:表示obsidian格式双链");
+        mode = scanner.nextInt();
+        if (mode == 1) {
+            System.out.println("已选择标准md双链模式");
+        }
+        else if (mode == 2){
+            System.out.println("已选择obsidian格式双链模式");
+        }
+
+
+//        // 增加模式选择，是否开启前端模式
+//        System.out.println("是否开启前端模式？(y/n)");
+//        String mode = scanner.nextLine();
+//        boolean frontendMode = mode.equalsIgnoreCase("y");
+//        if (frontendMode) {
+//            System.out.println("前端模式已开启，将生成前端文件");
+//            FilterDirectory.parentDir = new File(inputPath);
+//            StaticField.isOpenFrontend = true;
+//        }
+
         scanner.close();
+        return sourceCodePath;
     }
 
 
 
 
-
     /**
-     * 递归处理目录
-     * @param rootDirectory 当前要处理的目录
+     * 通过源码所在目录构建目录树，并把目录的节点依次进行处理
+     * @param rootDirectory  源码所在目录
      */
     private void processDirectory(File rootDirectory) throws IOException {
 
@@ -86,6 +121,8 @@ public class CodeToMD_Main {
         }
         //构建目录树,返回根节点 ，构造同时就会进行过滤
         TreeNode treeNode = TreeNode.build(rootDirectory);
+        //存放根目录节点存放到静态root对象中
+        TreeNode.root = treeNode;
         //将所有目录节点装入逻辑栈列
         ListTreeDir listTreeDir = new ListTreeDir(treeNode);
         //删除空包目录的元素
@@ -104,19 +141,22 @@ public class CodeToMD_Main {
      * @param node 文件列表
      */
     private void processCodeFilesToMd(TreeNode node) throws IOException {
-        CodeFilesToMd codeFilesToMd = new CodeFilesToMd(node);
-        //md标题名
-         String mdTitle = node.getDirName();
-        //将代码文件拼接成Markdown
-        String content_Md = codeFilesToMd.CodeFilesToMd();
 
+        //md标题名
+        String mdTitle = node.getDirName();
         //创建文件名
-        String  FileName = CreateFileName(DEFAULT_SOURCE_DIR, mdTitle, FileExtensionName.MD);
+        String  FileName = CreateFileName(TARGET_DIR, mdTitle, FileExtensionName.MD);
+
+        // 创建CodeFilesToMd对象
+        CodeFilesToMd codeFilesToMd = new CodeFilesToMd(node);
+        //将代码文件拼接成Markdown
+
+        String content_Md = codeFilesToMd.CodeFilesToMd(mode);
+
 
         //创建文件
-        Write_File.createFile(DEFAULT_SOURCE_DIR, FileName, content_Md);
+        Write_File.createFile(TARGET_DIR, FileName, content_Md);
         logger.info("Generated Markdown file: {}", mdTitle+".md");
-
 
     }
 

@@ -28,18 +28,29 @@ public class CodeFilesToMd {
 
     }
 
-  public String CodeFilesToMd() throws IOException {
+
+    public String CodeFilesToMd(Integer mode) throws IOException {
 
         // todo: 将来有需要的话，还可以根据文件大小，日期、文件内容进行过滤
 
         // 拼接导航栏和代码文件
-      StringBuilder md = new StringBuilder();
-      md.append(md_Navigation_StandardLink());
-      md.append("\n");
-      md.append("\n");
-      md.append(md_CodeFiles());
-      return md.toString();
-
+        StringBuilder md = new StringBuilder();
+        switch (mode) {
+            case 1:
+                md.append(md_Navigation_StandardLink());
+                break;
+            case 2:
+                md.append(md_Navigation_Obsidian());
+                break;
+            default:
+                // 默认使用标准md格式
+                md.append(md_Navigation_StandardLink());
+                break;
+        }
+        md.append("\n");
+        md.append("\n");
+        md.append(md_CodeFiles());
+        return md.toString();
 
     }
 
@@ -49,6 +60,7 @@ public class CodeFilesToMd {
      * 拼接笔记导航栏 - 使用标准 Markdown 链接格式
      * @return 返回拼接好的导航栏字符串构建器
      */
+
     private StringBuilder md_Navigation_StandardLink() {
         StringBuilder md = new StringBuilder();
         md.append("## 笔记导航栏");
@@ -65,6 +77,10 @@ public class CodeFilesToMd {
 
         // 只要不是根节点，就一定会有父节点。
         if (!node.isRoot()) {
+            //直接返回根目录
+            String rootName = TreeNode.root.getDirName();
+            md.append("- [根目录](" + rootName + ".md)");
+            md.append("\n");
             String fileName = node.getParent().getDirName();
             md.append("- [返回上级目录](" + fileName + ".md)");
             md.append("\n");
@@ -89,9 +105,7 @@ public class CodeFilesToMd {
     private void appendSubDirectoriesStandardLink(StringBuilder md, List<TreeNode> nodes, int level) {
         for (TreeNode treeNode : nodes) {
             // 添加适当数量的缩进空格
-            for (int i = 0; i < level; i++) {
-                md.append("  ");
-            }
+            md.append(getIndent(level));
 
             md.append("- [" + treeNode.getDirName() + "](" + treeNode.getDirName() + ".md)");
             md.append("\n");
@@ -101,13 +115,11 @@ public class CodeFilesToMd {
                 appendSubDirectoriesStandardLink(md, treeNode.getChildrenDir(), level + 1);
             }
 
-            // 如果是叶子节点，添加该目录下的所有文件
-            if (treeNode.isLeaf()) {
+            // 添加该目录下的所有文件
+            if (!treeNode.getChildrenFile().isEmpty()) {
                 for (File file : treeNode.getChildrenFile()) {
                     // 添加文件缩进
-                    for (int i = 0; i <= level; i++) {
-                        md.append("  ");
-                    }
+                    md.append(getIndent(level+1));
 
                     md.append("- " + file.getName());
                     md.append("\n");
@@ -121,7 +133,7 @@ public class CodeFilesToMd {
      *  @return 返回拼接好的导航栏字符串构建器
      */
 
-    private StringBuilder md_Navigation() {
+    private StringBuilder md_Navigation_Obsidian() {
         StringBuilder md = new StringBuilder();
         md.append("## 笔记导航栏");
         md.append("\n");
@@ -137,6 +149,10 @@ public class CodeFilesToMd {
 
         // 只要不是根节点，就一定会有父节点。
         if (!node.isRoot()) {
+            //直接返回根目录
+            String rootName = TreeNode.root.getDirName();
+            md.append("- 根目录：[[" + rootName + "]]");
+            md.append("\n");
             String fileName = node.getParent().getDirName();
             md.append("- 返回上级目录：[[" + fileName + "]]");
             md.append("\n");
@@ -146,9 +162,23 @@ public class CodeFilesToMd {
             md.append("- 下级目录");
             md.append("\n");
             appendSubDirectories(md, node.getChildrenDir(), 1); // 开始递归
-        }
 
+        }
         return md;
+    }
+
+    /**
+     * 生成指定层级的缩进
+     * @param level 缩进层级
+     * @return 缩进字符串
+     */
+    private String getIndent(int level) {
+        if (level <= 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < level; i++) {
+            sb.append("  ");
+        }
+        return sb.toString();
     }
 
     /**
@@ -161,25 +191,24 @@ public class CodeFilesToMd {
     private void appendSubDirectories(StringBuilder md, List<TreeNode> nodes, int level) {
         for (TreeNode treeNode : nodes) {
             // 添加适当数量的缩进空格
-            for (int i = 0; i < level; i++) {
-                md.append("  ");
-            }
-
+            md.append(getIndent(level));
             md.append("- [[").append(treeNode.getDirName()).append("]]");
             md.append("\n");
 
+
+
             // 如果还有子目录，则递归调用 ,说明就是非叶子节点
             if (!treeNode.isLeaf()) {
+
                 appendSubDirectories(md, treeNode.getChildrenDir(), level + 1);
             }
 
-            // 如果是叶子节点，添加该目录下的所有文件
-            if (treeNode.isLeaf()) {
+            // 添加该节点下的所有文件
+            if (!treeNode.getChildrenFile().isEmpty()) {
+
                 for (File file : treeNode.getChildrenFile()) {
                     // 添加文件缩进
-                    for (int i = 0; i <= level; i++) {
-                        md.append("  ");
-                    }
+                    md.append(getIndent(level+1));
                     md.append("- ").append(file.getName());
                     md.append("\n");
                 }

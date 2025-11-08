@@ -1,6 +1,7 @@
 package Tool;
 import java.util.ArrayList;
 
+import java.util.Iterator;
 import java.util.List;
 /**
  * @BelongsProject: SourceCode_become_md
@@ -65,7 +66,37 @@ public class ListTreeDir {
             }
         }
     }
-    
+
+    /**
+     * @description: 删除队列中的元素，这样子做是为了删除没有代码文件的空包目录
+     * 删除队列中的元素：要被删除元素要满足这个几个条件； 1.该目录下没有代码文件 2.该目录有且只有一个子目录 3.不是根目录 4.不是叶子节点
+     * 删除后还要保证数结构不能断掉，所以要让父目录指向要被删除元素的子目录，而子目录的父目录指向要被删除元素的父目录后，才可以进行删除
+     * @author: yekunwei
+     * @date: 2025/11/8 15:27
+     **/
+    public void deleteNode() {
+        Iterator<TreeNode> iterator = listTree.iterator();
+        while (iterator.hasNext()) {
+            TreeNode node = iterator.next();
+            // 满足删除条件
+            if (node.getChildrenFile().isEmpty()
+                    && node.getChildrenDir().size() == 1
+                    && !node.isRoot()&& !node.isLeaf()) {
+
+                TreeNode child = node.getChildrenDir().get(0);
+
+                child.setParent(node.getParent());
+                node.getParent().addChild(child);
+                // 在父节点也要移除该元素
+                node.getParent().getChildrenDir().remove(node);
+                // 使用 iterator 删除以避免异常
+                iterator.remove();
+            }
+            // 因为进行了删除所以栈指针要重新计算
+            stackPointer = listTree.size();
+        }
+    }
+
 
     /**
      * 判断栈是否为空

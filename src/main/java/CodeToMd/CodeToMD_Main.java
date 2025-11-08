@@ -6,6 +6,8 @@ import java.util.*;
 
 
 import CodeToMd.DirectoryEnum.FileExtensionName;
+import CodeToMd.DirectoryEnum.FilterDirectory;
+import CodeToMd.DirectoryEnum.StaticField;
 import Tool.ListTreeDir;
 import Tool.TreeNode;
 import Tool.Write_File;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static Tool.FileProcess.CreateFileName;
+import static Tool.Stirng_Process.removeDoubleQuotes;
 
 /**
  * 主类，用于将代码文件处理为Markdown格式
@@ -31,6 +34,20 @@ public class CodeToMD_Main {
         // 提示用户输入目录路径
         System.out.println("请输入要处理的源代码目录路径:");
         String inputPath = scanner.nextLine().trim();
+        //去除双引号
+        inputPath=removeDoubleQuotes(inputPath);
+
+        //增加模式选择，是否开启前端模式
+        System.out.println("是否开启前端模式？(y/n)");
+        String mode = scanner.nextLine();
+        boolean frontendMode = mode.equalsIgnoreCase("y");
+        if (frontendMode) {
+            System.out.println("前端模式已开启，将生成前端文件");
+            FilterDirectory.parentDir=new File(inputPath);
+            StaticField.isOpenFrontend = true;
+        }
+
+
 
 
 
@@ -67,15 +84,18 @@ public class CodeToMD_Main {
             logger.warn("The provided path is not a directory: {}", rootDirectory);
             return;
         }
-        //构建目录树,返回根节点
+        //构建目录树,返回根节点 ，构造同时就会进行过滤
         TreeNode treeNode = TreeNode.build(rootDirectory);
         //将所有目录节点装入逻辑栈列
         ListTreeDir listTreeDir = new ListTreeDir(treeNode);
+        //删除空包目录的元素
+        listTreeDir.deleteNode();
         //遍历目录树
         while (!listTreeDir.isEmpty()) {
             TreeNode node = listTreeDir.pop();
             processCodeFilesToMd( node);
         }
+
 
     }
 

@@ -2,6 +2,9 @@ package Tool;
 
 import CodeToMd.DirectoryEnum.CodeTypeEnum;
 import CodeToMd.DirectoryEnum.FileExtensionName;
+import CodeToMd.DirectoryEnum.FilterDirectory;
+
+import CodeToMd.DirectoryEnum.StaticField;
 
 import java.io.File;
 
@@ -10,6 +13,7 @@ import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class FileProcess {
 
@@ -92,14 +96,56 @@ public static String CreateFileName(File dir, String fileName, FileExtensionName
 
     //过滤掉不需要的目录名字 .开头的目录
     public static List<File> filterDirName(List<File> files) {
-        List<File> filteredFiles = new ArrayList<>();
-        for (File file : files) {
-            if (!file.getName().startsWith(".")) {
-                filteredFiles.add(file);
-            }
+        List<File> filteredFiles = filterOutHiddenDirectories( files);
+         //判断是否打开前端转md模式
+        if (StaticField.isOpenFrontend) {
+            filteredFiles = filterFrontendDirectories(filteredFiles);
         }
+
         return filteredFiles;
     }
+    /**
+     * 保留前端项目中的特定目录
+     * @param files 待过滤的文件列表
+     * @return 过滤后的文件列表
+     */
+    public static List<File> filterFrontendDirectories(List<File> files) {
+
+        List<File> result = new ArrayList<>();
+        //filterDirectory文件 是要进行保留的
+        List<String> filterDirectoryList = FilterDirectory.getChildFiles();
+        for (File file : files) {
+            //应该保留的文件
+            boolean shouldSave = false;
+            String absolutePath = file.getAbsolutePath();
+            //获取所有文件不需要过滤文件
+            for (String filterDirectory : filterDirectoryList) {
+                if (Stirng_Process.matchPath(absolutePath, filterDirectory)) {
+                    shouldSave = true;
+                    break;
+                }
+            }
+
+            if (shouldSave) {
+                result.add(file);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 过滤掉以点(.)开头的隐藏目录
+     * @param files 待过滤的文件列表
+     * @return 过滤后的文件列表
+     */
+    public static List<File> filterOutHiddenDirectories(List<File> files) {
+        return files.stream()
+                .filter(file -> !file.getName().startsWith("."))
+                .collect(Collectors.toList());
+    }
+
+
+
 
     /**
      * 描述：过滤出代码文件

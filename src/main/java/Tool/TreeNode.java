@@ -19,6 +19,9 @@ private File directory;
     
 
     private TreeNode parent;
+    
+
+
     // 用来存储子目录
 private List<TreeNode> childrenDir = new ArrayList<>();
 //用来存储子文件
@@ -127,6 +130,11 @@ public List<File> getChildrenFile() {
         TreeNode p = parent;
         while (p != null) { ++d; p = p.parent; }
         return d;
+    }
+
+
+    public void setParent(TreeNode parent) {
+        this.parent = parent;
     }
 
 }

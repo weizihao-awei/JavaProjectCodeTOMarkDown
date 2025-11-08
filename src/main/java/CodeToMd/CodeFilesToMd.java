@@ -44,7 +44,7 @@ public class CodeFilesToMd {
     }
 
     /**
-     *  拼接笔记导航栏
+     *  拼接笔记导航栏 -obsidian格式的双链
      *  @return 返回拼接好的导航栏字符串构建器
      */
 

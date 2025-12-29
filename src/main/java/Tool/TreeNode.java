@@ -98,10 +98,10 @@ public List<File> getChildrenFile() {
     /* ========== 核心：双向绑定 ========== */
     public void addChild(TreeNode child) {
         Objects.requireNonNull(child);
-        if (child.parent != null) {
-            // 先从原父节点移除,这个是给
-            child.parent.childrenDir.remove(child);
-        }
+//        if (child.parent != null) {
+//            // 先从原父节点移除,这个是给
+//            child.parent.childrenDir.remove(child);
+//        }
         this.childrenDir.add(child);
         child.parent = this;                      // 指回父节点
     }

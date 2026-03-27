@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class ListTreeDir {
     List<TreeNode> listTree = new ArrayList<>();
+
     private int stackPointer;
 
 
@@ -32,7 +33,7 @@ public class ListTreeDir {
             }
         }
     }
-    
+
     /**
      * 从末尾出栈一个元素
      * @return 栈顶元素，如果栈为空则返回null
